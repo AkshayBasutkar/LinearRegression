@@ -1,18 +1,19 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 class SimpleLinearRegression:
     def __init__(self):
-        self.slope = 0
-        self.intercept = 0
+        self.slope = 0.0
+        self.intercept = 0.0
         self.is_fitted = False
 
     def fit(self, x, y):
         
         n = len(x)
 
-        x_mean = sum(x) / len(x)
-        y_mean = sum(y) / len(y)
+        x_mean = sum(x) / n
+        y_mean = sum(y) / n
 
         numerator = 0.0
         denominator = 0.0
@@ -39,6 +40,36 @@ class SimpleLinearRegression:
             return [self.intercept + (self.slope * x_val) for x_val in x]
         else:
             return self.intercept + (self.slope * x)
+    
+    def summary(self, x, y):
+        if not self.is_fitted:
+            print("Model is not fitted")
+            return
+
+        r2 = self.score(x, y)
+        adj_r2 = self.adj_r2(x, y)
+        mse = self.MSE(x, y)
+
+        print("""
+    ==============================
+    Simple Linear Regression Summary
+    ==============================
+    Slope        : {:.4f}
+    Intercept    : {:.4f}
+    R²           : {:.4f}
+    Adjusted R²  : {:.4f}
+    MSE          : {:.4f}
+    Samples      : {}
+    ==============================
+    """.format(
+            self.slope,
+            self.intercept,
+            r2,
+            adj_r2,
+            mse,
+            len(y)
+        ))
+
     
     def MSE(self, x, y):
         if not self.is_fitted:
@@ -110,3 +141,35 @@ Total       {self.sst}
 
         adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
         return adj_r2
+    
+
+    def plot_regression(self, x, y):
+        if not self.is_fitted:
+            print("Model is not fitted")
+            return
+
+        y_pred = self.predict(x)
+
+        plt.figure()
+        plt.scatter(x, y)
+        plt.plot(x, y_pred)
+        plt.xlabel("X")
+        plt.ylabel("y")
+        plt.title("Regression Line vs Actual Data")
+        plt.show()
+
+    def plot_residuals(self, x, y):
+        if not self.is_fitted:
+            print("Model is not fitted")
+            return
+
+        y_pred = self.predict(x)
+        residuals = [y[i] - y_pred[i] for i in range(len(y))]
+
+        plt.figure()
+        plt.scatter(x, residuals)
+        plt.axhline(0)
+        plt.xlabel("X")
+        plt.ylabel("Residuals")
+        plt.title("Residual Plot")
+        plt.show()
