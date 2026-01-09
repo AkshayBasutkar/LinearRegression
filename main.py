@@ -54,15 +54,59 @@ class SimpleLinearRegression:
         mse = total_error / len(y)
 
         return mse
+    
+    
+
+    def anova(self, x, y):
+        n = len(y)
+        y_pred = self.predict(x)
+        
+        y_mean = sum(y) / n
+
+        sst = 0.0
+        sse = 0.0 
+        ssr = 0.0
+
+        for i in range(n):
+            sst += np.power((y[i] - y_mean), 2)
+            ssr += np.power((y_pred[i] - y_mean), 2)
 
 
+        self.sse = sst - ssr
+        self.sst = sst
+        self.ssr = ssr
 
-X = np.linspace(1, 10, 10)
-y = 4 * X + 2
+        self.msr = self.ssr
+        self.mse = self.sse / (n - 1)
 
-model = SimpleLinearRegression()
-model.fit(X, y)
+        self.f_stat = self.msr / self.mse
 
-print(model.predict([1, 2, 3]))
-print(model.MSE(X, y))
+        print(f"""
+ANOVA TABLE 
+Source     \tSqaured Sum  \t Mean Squared Sum \t F-Statistic
+Regression  {self.ssr}            {self.msr}               {self.f_stat} 
+Residual    {self.sse}            {self.mse}
+Total       {self.sst}
+              """)
+        
+    
+    def score(self, x, y):
+        y_pred = self.predict(x)
+        y_mean = sum(y) / len(y)
 
+        sse = 0.0
+        sst = 0.0
+
+        for i in range(len(y)):
+            sse += (y[i] - y_pred[i]) ** 2
+            sst += (y[i] - y_mean) ** 2
+
+        return 1 - (sse / sst)  
+
+    def adj_r2(self, x, y):
+        n = len(y)
+        p = 1
+        r2 = self.score(x, y)
+
+        adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
+        return adj_r2
